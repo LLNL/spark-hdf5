@@ -1,5 +1,7 @@
 # Spark-HDF5
 
+[![Build Status](https://travis-ci.org/LLNL/spark-hdf5.svg?branch=master)](https://travis-ci.org/LLNL/spark-hdf5)
+
 ## Progress
 Currently the plugin can read numeric arrays (signed and unsigned) from HDF5 files.
 
