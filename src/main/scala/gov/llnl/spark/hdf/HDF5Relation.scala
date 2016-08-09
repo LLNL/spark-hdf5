@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,22 +21,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark.hdf
+package gov.llnl.spark.hdf
 
 import java.io.File
 import java.net.URI
 
+import gov.llnl.spark.hdf.Reader.{BoundedScan, ScanItem, UnboundedScan}
+import gov.llnl.spark.hdf.reader.{DatasetReader, HDF5Reader}
+import gov.llnl.spark.hdf.reader.HDF5Schema.Dataset
 import org.apache.commons.io.FilenameUtils
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sources.{BaseRelation, TableScan}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
-import spark.hdf.Reader.{BoundedScan, ScanItem, UnboundedScan}
-import spark.hdf.reader.HDF5Schema.Dataset
-import spark.hdf.reader.{DatasetReader, HDF5Reader}
 
 import scala.language.existentials
 

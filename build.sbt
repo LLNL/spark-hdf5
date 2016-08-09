@@ -39,7 +39,7 @@ spShortDescription := "A plugin to enable Apache Spark to read HDF5 files"
 spDescription := "Integrates HDF5 into Spark"
 
 sparkVersion := "1.5.0"
-sparkComponents ++= Seq("core", "sql", "catalyst")
+sparkComponents ++= Seq("core", "sql")
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
 spIncludeMaven := false

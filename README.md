@@ -25,7 +25,7 @@ The path is specified by separating the file path from the dataset path with a c
 
 You can test out the code interactively:
 ```
-import spark.hdf5._
+import spark.hdf._
 val df = sqlContext.read.option("dataset", "dataset")
                         .hdf5("src/test/resources/test.h5")
 df.show
