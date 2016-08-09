@@ -53,7 +53,6 @@ This file is divided into 3 sections:
     <check level="error" class="org.scalastyle.file.HeaderMatchesChecker" enabled="true">
         <parameters>
             <parameter name="header"><![CDATA[/*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -76,7 +75,6 @@ This file is divided into 3 sections:
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */]]></parameter>
         </parameters>
     </check>
@@ -150,7 +148,7 @@ This file is divided into 3 sections:
     <check level="error" class="org.scalastyle.scalariform.NotImplementedErrorUsage" enabled="true"></check>
 
     <!-- As of SPARK-7558, all tests in Spark should extend o.a.s.SparkFunSuite instead of FunSuite directly -->
-    <check customId="funsuite" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="true">
+    <check customId="funsuite" level="error" class="org.scalastyle.scalariform.TokenChecker" enabled="false">
         <parameters><parameter name="regex">^FunSuite[A-Za-z]*$</parameter></parameters>
         <customMessage>Tests must extend org.apache.spark.SparkFunSuite instead.</customMessage>
     </check>
