@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,16 +21,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 package spark.hdf
 
 import org.apache.commons.io.FilenameUtils
-import org.apache.spark.sql.test.SharedSQLContext
-import org.apache.spark.sql.{QueryTest, Row}
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.types._
 
-class HDF5QuerySuite extends QueryTest with SharedSQLContext {
+class HDF5QuerySuite extends FunTestSuite {
 
   val h5file = getClass.getResource("test1.h5").toString
   val h5dir = FilenameUtils.getFullPathNoEndSeparator(getClass.getResource("test1.h5").getPath)
@@ -51,7 +48,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
     val df = sqlContext.read.option("dataset", multiDataset).hdf5(h5dir)
     val expected = (0 until 30).map{ x => Row(x % 10, x) }
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Read files in chunks") {
@@ -69,8 +66,8 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
       (1L until 9L).map { x => Row(x, (x - 2).toByte) } :+
       Row(9L, Byte.MaxValue)
 
-    checkAnswer(evenchunkeddf, expected)
-    checkAnswer(oddchunkeddf, expected)
+    checkEqual(evenchunkeddf, expected)
+    checkEqual(oddchunkeddf, expected)
   }
 
   // Signed integer tests
@@ -87,7 +84,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
         (1L until 9L).map { x => Row(x, (x - 2).toByte) } :+
         Row(9L, Byte.MaxValue)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading int16") {
@@ -102,7 +99,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
         (1L until 9L).map { x => Row(x, (x - 2).toShort) } :+
         Row(9L, Short.MaxValue)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading int32") {
@@ -117,7 +114,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
         (1L until 9L).map { x => Row(x, (x - 2).toInt) } :+
         Row(9L, Int.MaxValue)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading int64") {
@@ -132,7 +129,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
         (1L until 9L).map { x => Row(x, x - 2) } :+
         Row(9L, Long.MaxValue)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   // Unsigned integer tests
@@ -147,7 +144,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
 
     val expected = (0L until 9L).map { x => Row(x, x.toShort) } :+ Row(9L, 255)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading uint16") {
@@ -160,7 +157,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
 
     val expected = (0L until 9L).map { x => Row(x, x.toInt) } :+ Row(9L, 65535)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading uint32") {
@@ -173,7 +170,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
 
     val expected = (0L until 9L).map { x => Row(x, x) } :+ Row(9L, 4294967295L)
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   // Float tests
@@ -191,7 +188,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
       case 1 => Row(x, (-0.2 * x).toFloat)
     })
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
   test("Reading float64") {
@@ -207,7 +204,7 @@ class HDF5QuerySuite extends QueryTest with SharedSQLContext {
       case 1 => Row(x, (-2 * x).toDouble / 10)
     })
 
-    checkAnswer(df, expected)
+    checkEqual(df, expected)
   }
 
 }

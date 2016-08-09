@@ -28,14 +28,23 @@
 // Project metadata
 organization := "LLNL"
 name := "spark-hdf5"
-version := "0.0.1"
+version := "0.0.2"
+
 scalaVersion := "2.10.6"
 scalacOptions := Seq( "deprecation", "-feature" )
 
 // Spark specific information
 spName := "LLNL/spark-hdf5"
-sparkVersion := "1.6.2"
+spShortDescription := "A plugin to enable Apache Spark to read HDF5 files"
+spDescription := "Integrates HDF5 into Spark"
+
+sparkVersion := "1.5.0"
 sparkComponents ++= Seq("core", "sql", "catalyst")
+
+licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
+spIncludeMaven := false
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
 
 // Provided dependencies
 libraryDependencies ++= Seq(
@@ -45,10 +54,7 @@ libraryDependencies ++= Seq(
 // Test dependencies
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
-  "com.novocode" % "junit-interface" % "0.9" % "test",
-  "org.apache.spark" %% "spark-sql" % sparkVersion.value % "test" classifier "tests",
-  "org.apache.spark" %% "spark-core" % sparkVersion.value % "test" classifier "tests",
-  "org.apache.spark" %% "spark-catalyst" % sparkVersion.value % "test" classifier "tests"
+  "com.novocode" % "junit-interface" % "0.9" % "test"
 )
 
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
