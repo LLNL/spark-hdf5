@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,34 +21,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark.hdf
+package gov.llnl.spark
 
-import org.apache.spark.sql.types._
-import spark.hdf.reader.HDF5Schema._
+import org.apache.spark.sql.{DataFrame, DataFrameReader}
 
-object SchemaConverter {
+package object hdf {
 
-  def convertSchema(dataset: Dataset[_]): StructType = {
-    val columns = dataset.dimension.indices.map {
-      index => "index" + index
-    }.map {
-      name => StructField(name, LongType, nullable = false)
-    }
-    StructType(columns :+ StructField("value", extractTypes(dataset.contains)))
+  /*
+   * Adds a method, `hdf5`, to DataFrameReader that allows you to read HDF5 files using
+   * the DataFileReader
+   */
+  implicit class HDF5DataFrameReader(reader: DataFrameReader) {
+    def hdf5: String => DataFrame = reader.format("gov.llnl.spark.hdf").load
   }
 
-  def extractTypes(datatype: HDF5Type[_]): DataType = datatype match {
-    case Int8 => ByteType
-    case UInt8 => ShortType
-    case Int16 => ShortType
-    case UInt16 => IntegerType
-    case Int32 => IntegerType
-    case UInt32 => LongType
-    case Int64 => LongType
-    case Float32 => FloatType
-    case Float64 => DoubleType
-  }
+  case class HDF5Path(filePath: String, datasetPath: String)
 
 }

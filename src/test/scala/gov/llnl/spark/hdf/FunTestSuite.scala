@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,32 +21,37 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark.hdf
+package gov.llnl.spark.hdf
 
-import org.apache.spark.sql.SQLContext
-import org.apache.spark.sql.sources._
+import org.apache.spark.sql._
+import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
-class DefaultSource extends RelationProvider {
+/*
+ * Base abstract class for all unit tests in Spark for handling common functionality.
+ */
+abstract class FunTestSuite extends FunSuite with BeforeAndAfterAll with Logging {
 
-  // RelationProvider Trait
-  override def createRelation(sqlContext: SQLContext,
-                              parameters: Map[String, String]): BaseRelation = {
+  private val sparkConf = new SparkConf()
 
-    val paths = parameters.get("path") match {
-      case Some(x) => x.split(",").map(_.trim)
-      case None => sys.error("'path' must be specified.")
+  protected var sqlContext: SQLContext = _
+
+  override protected def beforeAll(): Unit = {
+    super.beforeAll()
+    sqlContext = new SQLContext(new SparkContext("local[2]", "HDF5Suite", sparkConf))
+  }
+
+  override protected def afterAll(): Unit = {
+    try {
+      sqlContext.sparkContext.stop()
+    } finally {
+      super.afterAll()
     }
+  }
 
-    val extensions = parameters.getOrElse("extension", "h5").split(",").map(_.trim)
-
-    val dataset = parameters.getOrElse("dataset", "/")
-
-    val chunkSize = parameters.getOrElse("chunk size", "10000").toInt
-
-    new HDF5Relation(paths, dataset, extensions, chunkSize)(sqlContext)
-
+  def checkEqual(df: DataFrame, expected: Seq[Row]): Unit = {
+    assert(df.collect.toSet === expected.toSet)
   }
 
 }

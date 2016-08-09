@@ -22,7 +22,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spark.hdf
+package gov.llnl.spark.hdf
 
 import org.apache.commons.io.FilenameUtils
 import org.apache.spark.sql.Row

@@ -22,36 +22,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package spark.hdf
+package gov.llnl.spark.hdf
 
-import org.apache.spark.sql._
-import org.apache.spark.{Logging, SparkConf, SparkContext}
-import org.scalatest.{BeforeAndAfterAll, FunSuite}
+import org.apache.spark.sql.sources.DataSourceRegister
 
-/*
- * Base abstract class for all unit tests in Spark for handling common functionality.
- */
-abstract class FunTestSuite extends FunSuite with BeforeAndAfterAll with Logging {
+class DefaultSource15 extends DefaultSource with DataSourceRegister {
 
-  private val sparkConf = new SparkConf()
-
-  protected var sqlContext: SQLContext = _
-
-  override protected def beforeAll(): Unit = {
-    super.beforeAll()
-    sqlContext = new SQLContext(new SparkContext("local[2]", "HDF5Suite", sparkConf))
-  }
-
-  override protected def afterAll(): Unit = {
-    try {
-      sqlContext.sparkContext.stop()
-    } finally {
-      super.afterAll()
-    }
-  }
-
-  def checkEqual(df: DataFrame, expected: Seq[Row]): Unit = {
-    assert(df.collect.toSet === expected.toSet)
-  }
+  /* Extension of spark.hdf5.DefaultSource (which is Spark 1.3 and 1.4 compatible) for Spark 1.5.
+   * Since the class is loaded through META-INF/services we can decouple the two to have
+   * Spark 1.5 byte-code loaded lazily.
+   *
+   * This trick is adapted from spark elasticsearch-hadoop data source:
+   * <https://github.com/elastic/elasticsearch-hadoop>
+   */
+  override def shortName(): String = "hdf5"
 
 }

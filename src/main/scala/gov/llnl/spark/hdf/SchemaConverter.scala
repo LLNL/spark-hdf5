@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,21 +21,33 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark.hdf
+package gov.llnl.spark.hdf
 
-import org.apache.spark.sql.sources.DataSourceRegister
+import gov.llnl.spark.hdf.reader.HDF5Schema._
+import org.apache.spark.sql.types._
 
-class DefaultSource15 extends DefaultSource with DataSourceRegister {
+object SchemaConverter {
 
-  /* Extension of spark.hdf5.DefaultSource (which is Spark 1.3 and 1.4 compatible) for Spark 1.5.
-   * Since the class is loaded through META-INF/services we can decouple the two to have
-   * Spark 1.5 byte-code loaded lazily.
-   *
-   * This trick is adapted from spark elasticsearch-hadoop data source:
-   * <https://github.com/elastic/elasticsearch-hadoop>
-   */
-  override def shortName(): String = "hdf5"
+  def convertSchema(dataset: Dataset[_]): StructType = {
+    val columns = dataset.dimension.indices.map {
+      index => "index" + index
+    }.map {
+      name => StructField(name, LongType, nullable = false)
+    }
+    StructType(columns :+ StructField("value", extractTypes(dataset.contains)))
+  }
+
+  def extractTypes(datatype: HDF5Type[_]): DataType = datatype match {
+    case Int8 => ByteType
+    case UInt8 => ShortType
+    case Int16 => ShortType
+    case UInt16 => IntegerType
+    case Int32 => IntegerType
+    case UInt32 => LongType
+    case Int64 => LongType
+    case Float32 => FloatType
+    case Float64 => DoubleType
+  }
 
 }

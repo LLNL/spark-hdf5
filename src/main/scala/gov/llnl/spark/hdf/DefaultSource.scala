@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,22 +21,31 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark
+package gov.llnl.spark.hdf
 
-import org.apache.spark.sql.{DataFrame, DataFrameReader}
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.sources._
 
-package object hdf {
+class DefaultSource extends RelationProvider {
 
-  /*
-   * Adds a method, `hdf5`, to DataFrameReader that allows you to read HDF5 files using
-   * the DataFileReader
-   */
-  implicit class HDF5DataFrameReader(reader: DataFrameReader) {
-    def hdf5: String => DataFrame = reader.format("spark.hdf").load
+  // RelationProvider Trait
+  override def createRelation(sqlContext: SQLContext,
+                              parameters: Map[String, String]): BaseRelation = {
+
+    val paths = parameters.get("path") match {
+      case Some(x) => x.split(",").map(_.trim)
+      case None => sys.error("'path' must be specified.")
+    }
+
+    val extensions = parameters.getOrElse("extension", "h5").split(",").map(_.trim)
+
+    val dataset = parameters.getOrElse("dataset", "/")
+
+    val chunkSize = parameters.getOrElse("chunk size", "10000").toInt
+
+    new HDF5Relation(paths, dataset, extensions, chunkSize)(sqlContext)
+
   }
-
-  case class HDF5Path(filePath: String, datasetPath: String)
 
 }

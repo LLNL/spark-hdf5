@@ -1,5 +1,4 @@
 /*
- *
  * Copyright (c) 2016, Lawrence Livermore National Security, LLC.
  * Produced at the Lawrence Livermore National Laboratory
  *
@@ -22,9 +21,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-package spark.hdf.reader
+package gov.llnl.spark.hdf.reader
 
 import ch.systemsx.cisd.hdf5._
 
