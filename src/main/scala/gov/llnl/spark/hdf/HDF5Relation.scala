@@ -24,11 +24,9 @@
  */
 package gov.llnl.spark.hdf
 
-import java.io.File
 import java.net.URI
 
-import gov.llnl.spark.hdf.Reader.{BoundedScan, ScanItem, UnboundedScan}
-import gov.llnl.spark.hdf.reader.{DatasetReader, HDF5Reader}
+import gov.llnl.spark.hdf.ScanExecutor.{BoundedScan, UnboundedScan}
 import gov.llnl.spark.hdf.reader.HDF5Schema.Dataset
 import org.apache.commons.io.FilenameUtils
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
@@ -36,8 +34,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sources.{BaseRelation, TableScan}
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
-
-import scala.language.existentials
 
 class HDF5Relation( val paths: Array[String]
                   , val dataset: String
@@ -75,7 +71,7 @@ class HDF5Relation( val paths: Array[String]
 
   private lazy val hdf5Schema: Dataset[_] = files match {
     case Array(head, _*) =>
-      new Reader(head)
+      new ScanExecutor(head)
       .openReader(_.getObject(dataset)) match {
         case Some(x: Dataset[_]) => x
         case _ => throw new java.io.FileNotFoundException("Not a dataset")
@@ -89,7 +85,7 @@ class HDF5Relation( val paths: Array[String]
     val datasetRDD = sqlContext.sparkContext.parallelize(scans.map{
       case (file, size) => (file
                           , size
-                          , new Reader(file).openReader(reader => reader.getObject(dataset)))
+                          , new ScanExecutor(file).openReader(reader => reader.getObject(dataset)))
     })
     val scanRDD = datasetRDD.map{
       case (file, size, Some(ds: Dataset[_])) => UnboundedScan(file, ds, size)
@@ -101,46 +97,7 @@ class HDF5Relation( val paths: Array[String]
       case x: UnboundedScan => Seq(x)
     }
     splitScanRDD.flatMap{ item =>
-      new Reader(item.path).execQuery(item)
+      new ScanExecutor(item.path).execQuery(item)
     }
   }
-
-}
-
-object Reader {
-  sealed trait ScanItem {
-    val path: URI
-    val dataset: Dataset[_]
-    val chunkSize: Int
-  }
-  case class UnboundedScan(path: URI, dataset: Dataset[_], chunkSize: Int) extends ScanItem
-  case class BoundedScan(path: URI
-                         , dataset: Dataset[_]
-                         , chunkSize: Int
-                         , chunkNumber: Long = 0) extends ScanItem
-}
-
-class Reader(filePath: URI) extends Serializable {
-
-  def execQuery[T](scanItem: ScanItem): Seq[Row] = scanItem match {
-    case UnboundedScan(path, dataset, _) =>
-      val dataReader = newDatasetReader(dataset)(_.readDataset())
-      dataReader.zipWithIndex.map { case (x, index) => Row(index.toLong, x) }
-    case BoundedScan(path, dataset, size, number) =>
-      val dataReader = newDatasetReader(dataset)(_.readDataset(size, number))
-      dataReader.zipWithIndex.map { case (x, index) => Row((size * number) + index.toLong, x) }
-  }
-
-  def openReader[T](fun: HDF5Reader => T): T = {
-    val file = new File(filePath.toString)
-    val reader = new HDF5Reader(file)
-    val result = fun(reader)
-    reader.close()
-    result
-  }
-
-  def newDatasetReader[S, T](node: Dataset[T])(fun: DatasetReader[T] => S): S = {
-    openReader(reader => reader.getDataset(node)(fun))
-  }
-
 }

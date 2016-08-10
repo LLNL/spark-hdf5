@@ -57,6 +57,8 @@ libraryDependencies ++= Seq(
   "com.novocode" % "junit-interface" % "0.9" % "test"
 )
 
+scalastyleConfig := baseDirectory.value / "project/scalastyle-config.xml"
+
 lazy val testScalastyle = taskKey[Unit]("testScalastyle")
 
 testScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Test).toTask("").value

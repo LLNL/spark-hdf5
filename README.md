@@ -1,6 +1,4 @@
-# Spark-HDF5
-
-[![Build Status](https://travis-ci.org/LLNL/spark-hdf5.svg?branch=master)](https://travis-ci.org/LLNL/spark-hdf5)
+# Spark-HDF5 [![Build Status](https://travis-ci.org/LLNL/spark-hdf5.svg?branch=master)](https://travis-ci.org/LLNL/spark-hdf5)
 
 ## Progress
 Currently the plugin can read numeric arrays (signed and unsigned) from HDF5 files.
@@ -15,22 +13,36 @@ The following numeric types are supported:
   * Float32
   * Float64
 
-## Testing
-You can start a spark repl by running the following command:
+## Setup
+If you are using the sbt-spark-package, the easiest way to use the package is by requiring it from the [spark packages website](https://spark-packages.org/package/LLNL/spark-hdf5):
+```
+spDependencies += "LLNL/spark-hdf5:0.0.1"
+```
+
+## Usage
+```scala
+import gov.llnl.spark.hdf._
+
+val df = sqlContext.read.hdf5("path/to/file.h5", "/dataset")
+df.show
+```
+
+You can start a spark repl with the console target:
 ```
 sbt console
 ```
-This will fetch all of the dependencies, including setting up a local Spark instance, and start a Spark repl with the plugin loaded.
-The path is specified by separating the file path from the dataset path with a colon.
+This will fetch all of the dependencies, set up a local Spark instance, and start a Spark repl with the plugin loaded.
 
-You can test out the code interactively:
-```
-import spark.hdf._
-val df = sqlContext.read.option("dataset", "dataset")
-                        .hdf5("src/test/resources/test.h5")
-df.show
-```
-The plugin also includes a test suite which can be run through SBT
+## Options
+The following options can be set:
+
+Key          | Default | Description
+-------------|---------|------------
+`extension`  | `h5`    | The file extension of data files
+`chunk size` | `10000` | The maximum number of elements to be read in a single scan
+
+## Testing
+The plugin includes a test suite which can be run through SBT
 ```
 sbt test
 ```
