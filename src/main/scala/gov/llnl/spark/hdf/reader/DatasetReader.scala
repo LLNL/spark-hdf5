@@ -22,19 +22,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package gov.llnl.spark.hdf
+package gov.llnl.spark.hdf.reader
 
-import org.apache.spark.sql.sources.DataSourceRegister
+import ch.systemsx.cisd.hdf5.IHDF5Reader
+import gov.llnl.spark.hdf.reader.HDF5Schema.Dataset
 
-class DefaultSource15 extends DefaultSource with DataSourceRegister {
+class DatasetReader[T](val reader: IHDF5Reader, val node: Dataset[T]) extends Serializable {
 
-  /* Extension of spark.hdf5.DefaultSource (which is Spark 1.3 and 1.4 compatible) for Spark 1.5.
-   * Since the class is loaded through META-INF/services we can decouple the two to have
-   * Spark 1.5 byte-code loaded lazily.
-   *
-   * This trick is adapted from spark elasticsearch-hadoop data source:
-   * <https://github.com/elastic/elasticsearch-hadoop>
-   */
-  override def shortName(): String = "hdf5"
+  def readDataset(): Array[T] =
+    node.contains.readArray(reader, node.path)
+
+  def readDataset(blockSize: Int, blockNumber: Long): Array[T] =
+    node.contains.readArrayBlock(reader, node.path, blockSize, blockNumber)
 
 }

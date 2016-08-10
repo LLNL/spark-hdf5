@@ -29,8 +29,7 @@ import org.apache.spark.sql.{DataFrame, DataFrameReader}
 package object hdf {
 
   /*
-   * Adds a method, `hdf5`, to DataFrameReader that allows you to read HDF5 files using
-   * the DataFileReader
+   * Adds a method, `hdf5`, to DataFrameReader
    */
   implicit class HDF5DataFrameReader(reader: DataFrameReader) {
 
@@ -38,7 +37,5 @@ package object hdf {
         reader.format("gov.llnl.spark.hdf").option("dataset", dataset).load(file)
 
   }
-
-  case class HDF5Path(filePath: String, datasetPath: String)
 
 }
