@@ -33,7 +33,10 @@ package object hdf {
    * the DataFileReader
    */
   implicit class HDF5DataFrameReader(reader: DataFrameReader) {
-    def hdf5: String => DataFrame = reader.format("gov.llnl.spark.hdf").load
+
+    def hdf5(file: String, dataset: String): DataFrame =
+        reader.format("gov.llnl.spark.hdf").option("dataset", dataset).load(file)
+
   }
 
   case class HDF5Path(filePath: String, datasetPath: String)

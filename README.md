@@ -24,10 +24,10 @@ This will fetch all of the dependencies, including setting up a local Spark inst
 The path is specified by separating the file path from the dataset path with a colon.
 
 You can test out the code interactively:
-```
-import spark.hdf._
-val df = sqlContext.read.option("dataset", "dataset")
-                        .hdf5("src/test/resources/test.h5")
+```scala
+import gov.llnl.spark.hdf._
+
+val df = sqlContext.read.hdf5("src/test/resources/test.h5", "dataset")
 df.show
 ```
 The plugin also includes a test suite which can be run through SBT

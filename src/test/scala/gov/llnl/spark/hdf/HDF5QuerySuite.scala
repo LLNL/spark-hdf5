@@ -45,7 +45,7 @@ class HDF5QuerySuite extends FunTestSuite {
   val float64test = "/datatypes/float64"
 
   test("Reading multiple files") {
-    val df = sqlContext.read.option("dataset", multiDataset).hdf5(h5dir)
+    val df = sqlContext.read.hdf5(h5dir, multiDataset)
     val expected = (0 until 30).map{ x => Row(x % 10, x) }
 
     checkEqual(df, expected)
@@ -53,14 +53,12 @@ class HDF5QuerySuite extends FunTestSuite {
 
   test("Read files in chunks") {
     val evenchunkeddf = sqlContext.read
-      .option("dataset", int8test)
-      .option("chunk size", 5.toString)
-      .hdf5(h5file)
+          .option("chunk size", 5.toString)
+          .hdf5(h5file, int8test)
 
     val oddchunkeddf = sqlContext.read
-      .option("dataset", int8test)
-      .option("chunk size", 3.toString)
-      .hdf5(h5file)
+          .option("chunk size", 3.toString)
+          .hdf5(h5file, int8test)
 
     val expected = Row(0L, Byte.MinValue) +:
       (1L until 9L).map { x => Row(x, (x - 2).toByte) } :+
@@ -73,7 +71,7 @@ class HDF5QuerySuite extends FunTestSuite {
   // Signed integer tests
 
   test("Reading int8") {
-    val df = sqlContext.read.option("dataset", int8test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, int8test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -88,7 +86,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading int16") {
-    val df = sqlContext.read.option("dataset", int16test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, int16test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -103,7 +101,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading int32") {
-    val df = sqlContext.read.option("dataset", int32test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, int32test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -118,7 +116,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading int64") {
-    val df = sqlContext.read.option("dataset", int64test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, int64test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -135,7 +133,7 @@ class HDF5QuerySuite extends FunTestSuite {
   // Unsigned integer tests
 
   test("Reading uint8") {
-    val df = sqlContext.read.option("dataset", uint8test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, uint8test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -148,7 +146,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading uint16") {
-    val df = sqlContext.read.option("dataset", uint16test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, uint16test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -161,7 +159,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading uint32") {
-    val df = sqlContext.read.option("dataset", uint32test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, uint32test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -176,7 +174,7 @@ class HDF5QuerySuite extends FunTestSuite {
   // Float tests
 
   test("Reading float32") {
-    val df = sqlContext.read.option("dataset", float32test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, float32test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
@@ -192,7 +190,7 @@ class HDF5QuerySuite extends FunTestSuite {
   }
 
   test("Reading float64") {
-    val df = sqlContext.read.option("dataset", float64test).hdf5(h5file)
+    val df = sqlContext.read.hdf5(h5file, float64test)
 
     val expectedSchema = StructType(Seq(
       StructField("index0", LongType, nullable = false),
