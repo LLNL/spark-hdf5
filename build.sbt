@@ -28,16 +28,12 @@
 // Project metadata
 organization := "LLNL"
 name := "spark-hdf5"
-version := "0.0.2"
+version := "0.0.3"
 
 scalaVersion := "2.10.6"
 scalacOptions := Seq( "deprecation", "-feature" )
 
 // Spark specific information
-spName := "LLNL/spark-hdf5"
-spShortDescription := "A plugin to enable Apache Spark to read HDF5 files"
-spDescription := "Integrates HDF5 into Spark"
-
 sparkVersion := "1.5.0"
 sparkComponents ++= Seq("core", "sql")
 
@@ -46,15 +42,28 @@ spIncludeMaven := false
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".sbtcredentials")
 
-// Provided dependencies
-libraryDependencies ++= Seq(
-  "org.slf4j" % "slf4j-api" % "1.7.5" % "provided"
-)
-
 // Test dependencies
-libraryDependencies ++= Seq(
+val deps = Seq(
+  "org.slf4j" % "slf4j-api" % "1.7.5" % "provided",
   "org.scalatest" %% "scalatest" % "2.2.1" % "test",
   "com.novocode" % "junit-interface" % "0.9" % "test"
+)
+
+lazy val shaded = Project("shaded", file(".")).settings(
+  libraryDependencies ++= (deps.map(_ % "provided")),
+  unmanagedJars += file("lib/sis-jhdf5-batteries_included.jar"),
+  target := target.value / "shaded"
+)
+
+lazy val distribute = Project("distribution", file(".")).settings(
+  spName := "LLNL/spark-hdf5",
+  spShortDescription := "A plugin to enable Apache Spark to read HDF5 files",
+  spDescription := "Integrates HDF5 into Spark",
+
+  target := target.value / "distribution",
+  spShade := true,
+  assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false),
+  libraryDependencies ++= deps
 )
 
 scalastyleConfig := baseDirectory.value / "project/scalastyle-config.xml"
