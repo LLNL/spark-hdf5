@@ -1,9 +1,9 @@
 # Spark-HDF5 [![Build Status](https://travis-ci.org/LLNL/spark-hdf5.svg?branch=master)](https://travis-ci.org/LLNL/spark-hdf5)
 
 ## Progress
-Currently the plugin can read numeric arrays (signed and unsigned) from HDF5 files.
+The plugin can read single-dimensional arrays from HDF5 files.
 
-The following numeric types are supported:
+The following types are supported:
   * Int8
   * UInt8
   * Int16
@@ -12,6 +12,7 @@ The following numeric types are supported:
   * Int64
   * Float32
   * Float64
+  * Fixed length strings
 
 ## Setup
 If you are using the sbt-spark-package, the easiest way to use the package is by requiring it from the [spark packages website](https://spark-packages.org/package/LLNL/spark-hdf5):
@@ -50,7 +51,6 @@ sbt test
 ## Roadmap
   * Use the [hdf-obj package](https://www.hdfgroup.org/products/java/hdf-object/) rather than the [sis-jhdf5 wrapper](https://wiki-bsse.ethz.ch/pages/viewpage.action?pageId=26609113)
   * Support for multi-dimensional arrays
-  * Support for non-numerical types (String, Boolean, Structs)
   * Support for compound datasets
   * Additional testing
   * [Partition discovery][2] (data inference based on location)

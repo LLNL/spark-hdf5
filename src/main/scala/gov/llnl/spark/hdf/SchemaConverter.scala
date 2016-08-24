@@ -48,6 +48,7 @@ object SchemaConverter {
     case Int64 => LongType
     case Float32 => FloatType
     case Float64 => DoubleType
+    case String => StringType
   }
 
 }

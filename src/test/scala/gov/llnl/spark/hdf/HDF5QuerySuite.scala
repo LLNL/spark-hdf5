@@ -205,4 +205,18 @@ class HDF5QuerySuite extends FunTestSuite {
     checkEqual(df, expected)
   }
 
+  test("Reading fixed length strings") {
+    val dataset = "/datatypes/string"
+    val alpha = "abcdefghijklmnopqrstuvwxyz"
+    val df = sqlContext.read.hdf5(h5file, dataset)
+
+    val expectedSchema = StructType(Seq(
+      StructField("index0", LongType, nullable = false),
+      StructField("value", StringType)))
+    assert(df.schema === expectedSchema)
+
+    val expected = (0 until 10).map{x => Row(x, alpha.substring(0, 0 + x))}
+
+    checkEqual(df, expected)
+  }
 }

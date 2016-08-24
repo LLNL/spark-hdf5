@@ -143,6 +143,16 @@ object HDF5Schema {
       reader.float64.readArrayBlock(name, blockSize, blockNumber)
   }
 
+  case object String extends HDF5Type[String] {
+    override def readArray(reader: IHDF5Reader, name: String): Array[String] =
+      reader.string.readArray(name)
+
+    override def readArrayBlock(reader: IHDF5Reader
+                                , name: String
+                                , blockSize: Int
+                                , blockNumber: Long): Array[String] =
+      reader.string.readArrayBlock(name, blockSize, blockNumber)
+  }
 
   sealed trait HDF5Node {
     val path: String

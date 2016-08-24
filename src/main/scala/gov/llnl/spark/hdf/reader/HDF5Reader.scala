@@ -84,6 +84,7 @@ class HDF5Reader(val input: File) extends Closeable with Serializable {
       case (HDF5DataClass.INTEGER, true, 8) => HDF5Schema.Int64
       case (HDF5DataClass.FLOAT, true, 4) => HDF5Schema.Float32
       case (HDF5DataClass.FLOAT, true, 8) => HDF5Schema.Float64
+      case (HDF5DataClass.STRING, signed, size) => HDF5Schema.String
       case _ => throw new NotImplementedError("Type not supported")
     }
   }
