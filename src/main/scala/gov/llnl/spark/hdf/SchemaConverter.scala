@@ -39,16 +39,16 @@ object SchemaConverter {
   }
 
   def extractTypes(datatype: HDF5Type[_]): DataType = datatype match {
-    case Int8 => ByteType
-    case UInt8 => ShortType
-    case Int16 => ShortType
-    case UInt16 => IntegerType
-    case Int32 => IntegerType
-    case UInt32 => LongType
-    case Int64 => LongType
-    case Float32 => FloatType
-    case Float64 => DoubleType
-    case String => StringType
+    case Int8(_, _) => ByteType
+    case UInt8(_, _) => ShortType
+    case Int16(_, _) => ShortType
+    case UInt16(_, _) => IntegerType
+    case Int32(_, _) => IntegerType
+    case UInt32(_, _) => LongType
+    case Int64(_, _) => LongType
+    case Float32(_, _) => FloatType
+    case Float64(_, _) => DoubleType
+    case FLString(_, _) => StringType
   }
 
 }

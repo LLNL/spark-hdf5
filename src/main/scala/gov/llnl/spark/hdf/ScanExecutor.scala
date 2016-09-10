@@ -36,30 +36,28 @@ import scala.language.existentials
 
 object ScanExecutor {
   sealed trait ScanItem {
-    val path: URI
     val dataset: Dataset[_]
     val chunkSize: Int
   }
-  case class UnboundedScan(path: URI, dataset: Dataset[_], chunkSize: Int) extends ScanItem
-  case class BoundedScan(path: URI
-                         , dataset: Dataset[_]
-                         , chunkSize: Int
-                         , chunkNumber: Long = 0) extends ScanItem
+  case class UnboundedScan(dataset: Dataset[_], chunkSize: Int) extends ScanItem
+  case class BoundedScan(dataset: Dataset[_]
+                       , chunkSize: Int
+                       , chunkNumber: Long = 0) extends ScanItem
 }
 
-class ScanExecutor(filePath: URI) extends Serializable {
+class ScanExecutor(filePath: String) extends Serializable {
 
   def execQuery[T](scanItem: ScanItem): Seq[Row] = scanItem match {
-    case UnboundedScan(path, dataset, _) =>
+    case UnboundedScan(dataset, _) =>
       val dataReader = newDatasetReader(dataset)(_.readDataset())
       dataReader.zipWithIndex.map { case (x, index) => Row(index.toLong, x) }
-    case BoundedScan(path, dataset, size, number) =>
+    case BoundedScan(dataset, size, number) =>
       val dataReader = newDatasetReader(dataset)(_.readDataset(size, number))
       dataReader.zipWithIndex.map { case (x, index) => Row((size * number) + index.toLong, x) }
   }
 
   def openReader[T](fun: HDF5Reader => T): T = {
-    val file = new File(filePath.toString)
+    val file = new File(filePath)
     val reader = new HDF5Reader(file)
     val result = fun(reader)
     reader.close()

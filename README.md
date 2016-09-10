@@ -17,8 +17,9 @@ The following types are supported:
 ## Setup
 If you are using the sbt-spark-package, the easiest way to use the package is by requiring it from the [spark packages website](https://spark-packages.org/package/LLNL/spark-hdf5):
 ```
-spDependencies += "LLNL/spark-hdf5:0.0.1"
+spDependencies += "LLNL/spark-hdf5:0.0.4"
 ```
+Otherwise, download the latest release jar and include it on your classpath. 
 
 ## Usage
 ```scala
@@ -39,7 +40,7 @@ The following options can be set:
 
 Key          | Default | Description
 -------------|---------|------------
-`extension`  | `h5`    | The file extension of data files
+`extension`  | `h5`    | The file extension of data
 `chunk size` | `10000` | The maximum number of elements to be read in a single scan
 
 ## Testing

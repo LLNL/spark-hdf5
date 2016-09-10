@@ -32,16 +32,16 @@ import gov.llnl.spark.hdf.reader.HDF5Schema._
 import scala.collection.JavaConverters._
 
 class HDF5Reader(val input: File) extends Closeable with Serializable {
-  def getPath: String = input.getPath
+  lazy val path: String = input.getPath
 
   val reader = HDF5FactoryProvider.get().openForReading(input)
 
   def getSchema: HDF5Node = listMembers()
 
   private lazy val objects = getSchema.flatten().map {
-    case node@Dataset(name, _, _, _) => (name, node)
-    case node@Group(name, _) => (name, node)
-    case node@GenericNode(_) => (node.path, node)
+    case node@Dataset(_, name, _, _, _) => (name, node)
+    case node@Group(_, name, _) => (name, node)
+    case node@GenericNode(_, _) => (node.path, node)
   }.toMap
 
   def getObject(path: String): Option[HDF5Node] = objects.get(path)
@@ -56,35 +56,30 @@ class HDF5Reader(val input: File) extends Closeable with Serializable {
   def listMembers(name: String = "/"): HDF5Node = {
     reader.isGroup(name) match {
       case true =>
+        val children = reader.getGroupMembers(name).asScala
         name match {
-          case "/" => Group(name, reader.getGroupMembers(name).asScala.map {
-            x => listMembers("/" + x)
-          })
-          case _ => Group(name, reader.getGroupMembers(name).asScala.map {
-            x => listMembers(name + "/" + x)
-          })
+          case "/" => Group(path, name, children.map { x => listMembers("/" + x) })
+          case _ => Group(path, name, children.map { x => listMembers(name + "/" + x) })
         }
       case false =>
         val info = reader.getDataSetInformation(name)
-        Dataset(name
-              , infoToType(info.getTypeInformation)
-              , info.getDimensions
-              , info.getNumberOfElements)
+        val hdfType = infoToType(name, info.getTypeInformation)
+        Dataset(path, name, hdfType, info.getDimensions, info.getNumberOfElements)
     }
   }
 
-  def infoToType(info: HDF5DataTypeInformation): HDF5Type[_] = {
+  def infoToType(name: String, info: HDF5DataTypeInformation): HDF5Type[_] = {
     (info.getDataClass, info.isSigned, info.getElementSize) match {
-      case (HDF5DataClass.INTEGER, true, 1) => HDF5Schema.Int8
-      case (HDF5DataClass.INTEGER, false, 1) => HDF5Schema.UInt8
-      case (HDF5DataClass.INTEGER, true, 2) => HDF5Schema.Int16
-      case (HDF5DataClass.INTEGER, false, 2) => HDF5Schema.UInt16
-      case (HDF5DataClass.INTEGER, true, 4) => HDF5Schema.Int32
-      case (HDF5DataClass.INTEGER, false, 4) => HDF5Schema.UInt32
-      case (HDF5DataClass.INTEGER, true, 8) => HDF5Schema.Int64
-      case (HDF5DataClass.FLOAT, true, 4) => HDF5Schema.Float32
-      case (HDF5DataClass.FLOAT, true, 8) => HDF5Schema.Float64
-      case (HDF5DataClass.STRING, signed, size) => HDF5Schema.String
+      case (HDF5DataClass.INTEGER, true, 1) => HDF5Schema.Int8(path, name)
+      case (HDF5DataClass.INTEGER, false, 1) => HDF5Schema.UInt8(path, name)
+      case (HDF5DataClass.INTEGER, true, 2) => HDF5Schema.Int16(path, name)
+      case (HDF5DataClass.INTEGER, false, 2) => HDF5Schema.UInt16(path, name)
+      case (HDF5DataClass.INTEGER, true, 4) => HDF5Schema.Int32(path, name)
+      case (HDF5DataClass.INTEGER, false, 4) => HDF5Schema.UInt32(path, name)
+      case (HDF5DataClass.INTEGER, true, 8) => HDF5Schema.Int64(path, name)
+      case (HDF5DataClass.FLOAT, true, 4) => HDF5Schema.Float32(path, name)
+      case (HDF5DataClass.FLOAT, true, 8) => HDF5Schema.Float64(path, name)
+      case (HDF5DataClass.STRING, signed, size) => HDF5Schema.FLString(path, name)
       case _ => throw new NotImplementedError("Type not supported")
     }
   }

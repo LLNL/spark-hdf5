@@ -30,9 +30,9 @@ import gov.llnl.spark.hdf.reader.HDF5Schema.Dataset
 class DatasetReader[T](val reader: IHDF5Reader, val node: Dataset[T]) extends Serializable {
 
   def readDataset(): Array[T] =
-    node.contains.readArray(reader, node.path)
+    node.contains.readArray(reader)
 
   def readDataset(blockSize: Int, blockNumber: Long): Array[T] =
-    node.contains.readArrayBlock(reader, node.path, blockSize, blockNumber)
+    node.contains.readArrayBlock(reader, blockSize, blockNumber)
 
 }

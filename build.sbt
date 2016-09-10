@@ -28,7 +28,7 @@
 // Project metadata
 organization := "LLNL"
 name := "spark-hdf5"
-version := "0.0.3"
+version := "0.0.4"
 
 scalaVersion := "2.10.6"
 scalacOptions := Seq( "deprecation", "-feature" )

@@ -27,7 +27,7 @@ package gov.llnl.spark.hdf
 import java.net.URI
 
 import gov.llnl.spark.hdf.ScanExecutor.{BoundedScan, UnboundedScan}
-import gov.llnl.spark.hdf.reader.HDF5Schema.Dataset
+import gov.llnl.spark.hdf.reader.HDF5Schema.{Dataset}
 import org.apache.commons.io.FilenameUtils
 import org.apache.hadoop.fs.{FileStatus, FileSystem, Path}
 import org.apache.spark.rdd.RDD
@@ -36,16 +36,16 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{Row, SQLContext}
 
 class HDF5Relation( val paths: Array[String]
-                  , val dataset: String
-                  , val fileExtension: Array[String]
-                  , val chunkSize: Int)
+                    , val dataset: String
+                    , val fileExtension: Array[String]
+                    , val chunkSize: Int)
                   (@transient val sqlContext: SQLContext)
   extends BaseRelation with TableScan {
 
   val hadoopConfiguration = sqlContext.sparkContext.hadoopConfiguration
   val fileSystem = FileSystem.get(hadoopConfiguration)
 
-  val files: Array[URI] = {
+  lazy val files: Array[URI] = {
     val roots = paths.map{ path =>
       fileSystem.getFileStatus(new Path(path)) }.toSeq
 
@@ -67,37 +67,27 @@ class HDF5Relation( val paths: Array[String]
       .toArray
   }
 
+  private lazy val datasets: Array[Dataset[_]] = files.flatMap {
+    file => new ScanExecutor(file.toString).openReader(_.getObject(dataset))
+  }.collect { case y: Dataset[_] => y }
+
+  private lazy val hdf5Schema: Dataset[_] = datasets match {
+    case Array(head: Dataset[_], _*) => head
+    case _ => throw new java.io.FileNotFoundException("No files")
+  }
+
   override def schema: StructType = SchemaConverter.convertSchema(hdf5Schema)
 
-  private lazy val hdf5Schema: Dataset[_] = files match {
-    case Array(head, _*) =>
-      new ScanExecutor(head)
-      .openReader(_.getObject(dataset)) match {
-        case Some(x: Dataset[_]) => x
-        case _ => throw new java.io.FileNotFoundException("Not a dataset")
-      }
-    case Array() =>
-      throw new java.io.FileNotFoundException("No files")
-  }
-
   override def buildScan(): RDD[Row] = {
-    val scans = files.map( x => (x, chunkSize))
-    val datasetRDD = sqlContext.sparkContext.parallelize(scans.map{
-      case (file, size) => (file
-                          , size
-                          , new ScanExecutor(file).openReader(reader => reader.getObject(dataset)))
-    })
-    val scanRDD = datasetRDD.map{
-      case (file, size, Some(ds: Dataset[_])) => UnboundedScan(file, ds, size)
-      case x => x
-    }
-    val splitScanRDD = scanRDD.flatMap{
-      case UnboundedScan(file, ds, size) if ds.size > size =>
-        (0L until Math.ceil(ds.size.toFloat / size).toLong).map(x => BoundedScan(file, ds, size, x))
+    val scans = datasets.map{ UnboundedScan(_, chunkSize) }
+    val splitScans = scans.flatMap{
+      case UnboundedScan(ds, size) if ds.size > size =>
+        (0L until Math.ceil(ds.size.toFloat / size).toLong).map(x => BoundedScan(ds, size, x))
       case x: UnboundedScan => Seq(x)
     }
-    splitScanRDD.flatMap{ item =>
-      new ScanExecutor(item.path).execQuery(item)
+    sqlContext.sparkContext.parallelize(splitScans).flatMap{ item =>
+      new ScanExecutor(item.dataset.file).execQuery(item)
     }
   }
+
 }

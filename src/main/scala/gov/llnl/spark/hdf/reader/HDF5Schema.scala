@@ -29,149 +29,134 @@ import ch.systemsx.cisd.hdf5._
 object HDF5Schema {
 
   // TODO: Needs reference, time, unsigned, compound, enumeration
-  //          case BOOLEAN
-  //          case ENUM
-  //          case OPAQUE
-  //          case BITFIELD
   //          case COMPOUND
-  //          case REFERENCE
-  //          case OTHER
   sealed trait HDF5Type[T] {
-    def readArray(reader: IHDF5Reader, name: String): Array[T]
+    def readArray(reader: IHDF5Reader): Array[T]
     def readArrayBlock(reader: IHDF5Reader
-                       , name: String
                        , blockSize: Int
                        , blockNumber: Long): Array[T]
   }
 
-  case object Int8 extends HDF5Type[Byte] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Byte] =
+  case class Int8(file: String, name: String) extends HDF5Type[Byte] {
+    override def readArray(reader: IHDF5Reader): Array[Byte] =
       reader.int8.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Byte] =
       reader.int8.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object UInt8 extends HDF5Type[Short] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Short] =
+  case class UInt8(file: String, name: String) extends HDF5Type[Short] {
+    override def readArray(reader: IHDF5Reader): Array[Short] =
       reader.uint8.readArray(name).map(UnsignedIntUtils.toUint8)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Short] =
       reader.uint8.readArrayBlock(name, blockSize, blockNumber).map(UnsignedIntUtils.toUint8)
   }
 
-  case object Int16 extends HDF5Type[Short] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Short] =
+  case class Int16(file: String, name: String) extends HDF5Type[Short] {
+    override def readArray(reader: IHDF5Reader): Array[Short] =
       reader.int16.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Short] =
       reader.int16.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object UInt16 extends HDF5Type[Int] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Int] =
+  case class UInt16(file: String, name: String) extends HDF5Type[Int] {
+    override def readArray(reader: IHDF5Reader): Array[Int] =
       reader.uint16.readArray(name).map(UnsignedIntUtils.toUint16)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Int] =
       reader.uint16.readArrayBlock(name, blockSize, blockNumber).map(UnsignedIntUtils.toUint16)
   }
 
-  case object Int32 extends HDF5Type[Int] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Int] =
+  case class Int32(file: String, name: String) extends HDF5Type[Int] {
+    override def readArray(reader: IHDF5Reader): Array[Int] =
       reader.int32.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Int] =
       reader.int32.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object UInt32 extends HDF5Type[Long] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Long] =
+  case class UInt32(file: String, name: String) extends HDF5Type[Long] {
+    override def readArray(reader: IHDF5Reader): Array[Long] =
       reader.uint32.readArray(name).map(UnsignedIntUtils.toUint32)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Long] =
       reader.uint32.readArrayBlock(name, blockSize, blockNumber).map(UnsignedIntUtils.toUint32)
   }
 
-  case object Int64 extends HDF5Type[Long] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Long] =
+  case class Int64(file: String, name: String) extends HDF5Type[Long] {
+    override def readArray(reader: IHDF5Reader): Array[Long] =
       reader.int64.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Long] =
       reader.int64.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object Float32 extends HDF5Type[Float] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Float] =
+  case class Float32(file: String, name: String) extends HDF5Type[Float] {
+    override def readArray(reader: IHDF5Reader): Array[Float] =
       reader.float32.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Float] =
       reader.float32.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object Float64 extends HDF5Type[Double] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[Double] =
+  case class Float64(file: String, name: String) extends HDF5Type[Double] {
+    override def readArray(reader: IHDF5Reader): Array[Double] =
       reader.float64.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[Double] =
       reader.float64.readArrayBlock(name, blockSize, blockNumber)
   }
 
-  case object String extends HDF5Type[String] {
-    override def readArray(reader: IHDF5Reader, name: String): Array[String] =
+  case class FLString(file: String, name: String) extends HDF5Type[String] {
+    override def readArray(reader: IHDF5Reader): Array[String] =
       reader.string.readArray(name)
 
     override def readArrayBlock(reader: IHDF5Reader
-                                , name: String
                                 , blockSize: Int
                                 , blockNumber: Long): Array[String] =
       reader.string.readArrayBlock(name, blockSize, blockNumber)
   }
 
   sealed trait HDF5Node {
+    val file: String
     val path: String
 
     def flatten(): Seq[HDF5Node]
   }
 
-  case class Dataset[T](path: String
+  case class Dataset[T](  file: String
+                        , path: String
                         , contains: HDF5Type[T]
                         , dimension: Array[Long]
                         , size: Long) extends HDF5Node with Serializable {
     def flatten(): Seq[HDF5Node] = Seq(this)
   }
 
-  case class Group(path: String, children: Seq[HDF5Node]) extends HDF5Node {
+  case class Group(file: String, path: String, children: Seq[HDF5Node]) extends HDF5Node {
     def flatten(): Seq[HDF5Node] = this +: children.flatMap(x => x.flatten())
   }
 
-  case class GenericNode(path: String) extends HDF5Node {
+  case class GenericNode(file: String, path: String) extends HDF5Node {
     def flatten(): Seq[HDF5Node] = Seq(this)
   }
 
