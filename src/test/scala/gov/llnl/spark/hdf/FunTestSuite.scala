@@ -25,13 +25,13 @@
 package gov.llnl.spark.hdf
 
 import org.apache.spark.sql._
-import org.apache.spark.{Logging, SparkConf, SparkContext}
+import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{BeforeAndAfterAll, FunSuite}
 
 /*
  * Base abstract class for all unit tests in Spark for handling common functionality.
  */
-abstract class FunTestSuite extends FunSuite with BeforeAndAfterAll with Logging {
+abstract class FunTestSuite extends FunSuite with BeforeAndAfterAll {
 
   private val sparkConf = new SparkConf()
 
