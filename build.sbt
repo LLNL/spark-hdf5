@@ -30,11 +30,11 @@ organization := "LLNL"
 name := "spark-hdf5"
 version := "0.0.4"
 
-scalaVersion := "2.10.6"
+scalaVersion := "2.11.8"
 scalacOptions := Seq( "deprecation", "-feature" )
 
 // Spark specific information
-sparkVersion := "1.5.0"
+sparkVersion := "2.0.0"
 sparkComponents ++= Seq("core", "sql")
 
 licenses += "Apache-2.0" -> url("http://opensource.org/licenses/Apache-2.0")
